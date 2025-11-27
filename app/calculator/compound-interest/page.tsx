@@ -2,7 +2,7 @@ import { CompoundInterestCalculator } from "./compound-interest-calculator";
 
 export default function CompoundInterest() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="container mx-auto flex justify-center py-8 px-4">
       <CompoundInterestCalculator />
     </div>
   );

@@ -26,7 +26,7 @@ export function CompoundInterestCalculator() {
   const isYearly = watch("isYearly");
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-xl">
       <CardHeader>
         <CardTitle>Compound Interest Calculator</CardTitle>
       </CardHeader>
