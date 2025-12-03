@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -16,6 +18,8 @@ import {
 import { compoundInterest } from "@/app/formulas/compound-interest";
 import { formatNumber, formatCurrency } from "@/lib/utils";
 
+const YEAR_STEPS = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40];
+
 type FormValues = {
   initialInvestment: string;
   isYearly: boolean;
@@ -24,6 +28,8 @@ type FormValues = {
 };
 
 export function CompoundInterestCalculator() {
+  const [years, setYears] = useState(5);
+
   const { register, watch, setValue } = useForm<FormValues>({
     defaultValues: {
       initialInvestment: "1000",
@@ -40,7 +46,7 @@ export function CompoundInterestCalculator() {
     isYearly,
     recurringInvestment: formatNumber(watch("recurringInvestment")) ?? 0,
     percentageReturn: formatNumber(watch("percentageReturn")) ?? 0,
-    months: 13,
+    months: years * 12,
   });
 
   return (
@@ -98,6 +104,25 @@ export function CompoundInterestCalculator() {
                 {...register("percentageReturn")}
               />
             </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>Investment Period</Label>
+                <span className="text-sm font-medium">
+                  {years} {years === 1 ? "year" : "years"}
+                </span>
+              </div>
+              <Slider
+                value={[YEAR_STEPS.indexOf(years)]}
+                onValueChange={([index]) => setYears(YEAR_STEPS[index])}
+                max={YEAR_STEPS.length - 1}
+                step={1}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>1</span>
+                <span>40</span>
+              </div>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -111,7 +136,9 @@ export function CompoundInterestCalculator() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20">Month</TableHead>
+                  <TableHead className="w-20">
+                    {isYearly ? "Year" : "Month"}
+                  </TableHead>
                   <TableHead className="text-right">Invested</TableHead>
                   <TableHead className="text-right">Total Invested</TableHead>
                   <TableHead className="text-right">Value</TableHead>
@@ -119,23 +146,27 @@ export function CompoundInterestCalculator() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {result.map((row) => (
-                  <TableRow key={row.month}>
-                    <TableCell className="font-medium">{row.month}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(row.invested)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(row.totalInvestment)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(row.value)}
-                    </TableCell>
-                    <TableCell className="text-right text-green-600">
-                      {formatCurrency(row.value - row.totalInvestment)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {result
+                  .filter((row) => !isYearly || row.month % 12 === 0)
+                  .map((row) => (
+                    <TableRow key={row.month}>
+                      <TableCell className="font-medium">
+                        {isYearly ? row.month / 12 : row.month}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(row.invested)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(row.totalInvestment)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {formatCurrency(row.value)}
+                      </TableCell>
+                      <TableCell className="text-right text-green-600">
+                        {formatCurrency(row.value - row.totalInvestment)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </CardContent>
