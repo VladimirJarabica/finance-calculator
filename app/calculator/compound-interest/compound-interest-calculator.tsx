@@ -53,11 +53,11 @@ const DEFAULT_INVESTMENTS = [
 ];
 
 const TAB_COLORS = [
-  { bg: "bg-rose-500", border: "border-t-rose-500" },
-  { bg: "bg-blue-500", border: "border-t-blue-500" },
-  { bg: "bg-emerald-500", border: "border-t-emerald-500" },
-  { bg: "bg-amber-500", border: "border-t-amber-500" },
-  { bg: "bg-purple-500", border: "border-t-purple-500" },
+  { bg: "bg-[#5B8FF9]", border: "border-t-[#5B8FF9]", text: "text-white" }, // Blue
+  { bg: "bg-[#5AD8A6]", border: "border-t-[#5AD8A6]", text: "text-gray-800" }, // Teal
+  { bg: "bg-[#9270CA]", border: "border-t-[#9270CA]", text: "text-white" }, // Purple
+  { bg: "bg-[#E8684A]", border: "border-t-[#E8684A]", text: "text-white" }, // Orange
+  { bg: "bg-[#F6BD16]", border: "border-t-[#F6BD16]", text: "text-gray-800" }, // Yellow
 ];
 
 export function CompoundInterestCalculator() {
@@ -107,8 +107,9 @@ export function CompoundInterestCalculator() {
                 key={field.id}
                 onClick={() => setActiveTab(index)}
                 className={cn(
-                  "relative px-4 py-2 text-sm font-medium text-white rounded-t-lg transition-all",
+                  "relative px-4 py-2 text-sm font-medium rounded-t-lg transition-all",
                   colors.bg,
+                  colors.text,
                   isActive
                     ? "z-10 -mb-px pb-3"
                     : "opacity-70 hover:opacity-90 -mb-px pb-2"
