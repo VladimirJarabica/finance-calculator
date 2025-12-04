@@ -59,11 +59,9 @@ export function CompoundInterestCalculator() {
 
   return (
     <div className="w-full max-w-3xl space-y-6">
+      <h1 className="text-2xl font-bold">Compound Interest Calculator</h1>
       <Card>
-        <CardHeader>
-          <CardTitle>Compound Interest Calculator</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="initialInvestment">Initial Investment</Label>
