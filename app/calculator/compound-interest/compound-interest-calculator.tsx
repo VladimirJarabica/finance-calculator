@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
+import { useForm, useFieldArray } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,94 +23,76 @@ import {
 } from "@/components/ui/table";
 import { compoundInterest } from "@/app/formulas/compound-interest";
 import { formatNumber, formatCurrency } from "@/lib/utils";
+import { InvestmentCard, type FormValues } from "./investment-card";
 
 const YEAR_STEPS = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40];
 
-type FormValues = {
-  initialInvestment: string;
-  isYearly: boolean;
-  recurringInvestment: string;
-  percentageReturn: string;
-};
+const DEFAULT_INVESTMENTS = [
+  {
+    name: "Stocks",
+    initialInvestment: "1000",
+    isYearly: false,
+    recurringInvestment: "100",
+    percentageReturn: "10",
+  },
+  {
+    name: "Bonds",
+    initialInvestment: "500",
+    isYearly: false,
+    recurringInvestment: "50",
+    percentageReturn: "5",
+  },
+  {
+    name: "Gold",
+    initialInvestment: "200",
+    isYearly: false,
+    recurringInvestment: "25",
+    percentageReturn: "3",
+  },
+];
 
 export function CompoundInterestCalculator() {
   const [years, setYears] = useState(5);
 
-  const { register, watch, setValue } = useForm<FormValues>({
+  const { register, watch, setValue, control } = useForm<FormValues>({
     defaultValues: {
-      initialInvestment: "1000",
-      isYearly: false,
-      recurringInvestment: "",
-      percentageReturn: "10",
+      investments: DEFAULT_INVESTMENTS,
     },
   });
 
-  const isYearly = watch("isYearly");
-
-  const result = compoundInterest({
-    initialInvestment: formatNumber(watch("initialInvestment")) ?? 0,
-    isYearly,
-    recurringInvestment: formatNumber(watch("recurringInvestment")) ?? 0,
-    percentageReturn: formatNumber(watch("percentageReturn")) ?? 0,
-    months: years * 12,
+  const { fields } = useFieldArray({
+    control,
+    name: "investments",
   });
+
+  // Calculate result only for the first investment
+  const firstInvestment = watch("investments.0");
+  const result = firstInvestment
+    ? compoundInterest({
+        initialInvestment: formatNumber(firstInvestment.initialInvestment) ?? 0,
+        isYearly: firstInvestment.isYearly,
+        recurringInvestment:
+          formatNumber(firstInvestment.recurringInvestment) ?? 0,
+        percentageReturn: formatNumber(firstInvestment.percentageReturn) ?? 0,
+        months: years * 12,
+      })
+    : [];
 
   return (
     <div className="w-full max-w-3xl space-y-6">
       <h1 className="text-2xl font-bold">Compound Interest Calculator</h1>
-      <Card>
-        <CardContent className="pt-6">
-          <form className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="initialInvestment">Initial Investment</Label>
-              <Input
-                id="initialInvestment"
-                type="number"
-                placeholder="0"
-                {...register("initialInvestment")}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="isYearly">
-                {isYearly ? "Yearly" : "Monthly"} Investment
-              </Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Monthly</span>
-                <Switch
-                  id="isYearly"
-                  checked={isYearly}
-                  onCheckedChange={(checked) => setValue("isYearly", checked)}
-                />
-                <span className="text-sm text-muted-foreground">Yearly</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="recurringInvestment">
-                {isYearly ? "Yearly" : "Monthly"} Investment Amount
-              </Label>
-              <Input
-                id="recurringInvestment"
-                type="number"
-                placeholder="0"
-                {...register("recurringInvestment")}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="percentageReturn">Annual Return (%)</Label>
-              <Input
-                id="percentageReturn"
-                type="number"
-                placeholder="0"
-                step="0.1"
-                {...register("percentageReturn")}
-              />
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="grid gap-4">
+        {fields.map((field, index) => (
+          <InvestmentCard
+            key={field.id}
+            index={index}
+            control={control}
+            register={register}
+            setValue={setValue}
+          />
+        ))}
+      </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -136,7 +116,7 @@ export function CompoundInterestCalculator() {
       {result.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Results</CardTitle>
+            <CardTitle>Results ({firstInvestment?.name})</CardTitle>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
