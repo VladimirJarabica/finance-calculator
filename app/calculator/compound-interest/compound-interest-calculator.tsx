@@ -264,7 +264,72 @@ export function CompoundInterestCalculator() {
             <span>40</span>
           </div>
         </div>
+      </div>
 
+      {/* Chart showing all investments */}
+      {chartData.length > 0 && investments && investments.length > 0 && (
+        <div className="w-full max-w-8xl">
+          <Card>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={chartData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                    opacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="year"
+                    label={{
+                      value: "Year",
+                      position: "insideBottom",
+                      offset: -5,
+                    }}
+                  />
+                  <YAxis
+                    label={{
+                      value: "Value ($)",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                    tickFormatter={(value) => {
+                      if (value >= 1000000)
+                        return `$${(value / 1000000).toFixed(1)}M`;
+                      if (value >= 1000)
+                        return `$${(value / 1000).toFixed(0)}K`;
+                      return `$${value.toFixed(0)}`;
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => formatCurrency(value)}
+                    labelFormatter={(label) => `Year ${label}`}
+                  />
+                  <Legend />
+                  {investments.map((investment, index) => {
+                    const colors = TAB_COLORS[index % TAB_COLORS.length];
+                    const hexColor = colors.bg
+                      .replace("bg-[", "")
+                      .replace("]", "");
+                    return (
+                      <Line
+                        key={investment.name}
+                        type="monotone"
+                        dataKey={investment.name}
+                        stroke={hexColor}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    );
+                  })}
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <div className="w-full max-w-3xl space-y-6">
         {result.length > 0 && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -357,72 +422,6 @@ export function CompoundInterestCalculator() {
           </Card>
         )}
       </div>
-
-      {/* Chart showing all investments */}
-      {chartData.length > 0 && investments && investments.length > 0 && (
-        <div className="w-full max-w-8xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Investment Comparison</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={chartData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                    opacity={0.5}
-                  />
-                  <XAxis
-                    dataKey="year"
-                    label={{
-                      value: "Year",
-                      position: "insideBottom",
-                      offset: -5,
-                    }}
-                  />
-                  <YAxis
-                    label={{
-                      value: "Value ($)",
-                      angle: -90,
-                      position: "insideLeft",
-                    }}
-                    tickFormatter={(value) => {
-                      if (value >= 1000000)
-                        return `$${(value / 1000000).toFixed(1)}M`;
-                      if (value >= 1000)
-                        return `$${(value / 1000).toFixed(0)}K`;
-                      return `$${value.toFixed(0)}`;
-                    }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => formatCurrency(value)}
-                    labelFormatter={(label) => `Year ${label}`}
-                  />
-                  <Legend />
-                  {investments.map((investment, index) => {
-                    const colors = TAB_COLORS[index % TAB_COLORS.length];
-                    const hexColor = colors.bg
-                      .replace("bg-[", "")
-                      .replace("]", "");
-                    return (
-                      <Line
-                        key={investment.name}
-                        type="monotone"
-                        dataKey={investment.name}
-                        stroke={hexColor}
-                        strokeWidth={2}
-                        dot={{ r: 4 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    );
-                  })}
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
