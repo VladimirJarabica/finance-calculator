@@ -98,7 +98,7 @@ export function CompoundInterestCalculator() {
       {/* Card file tabs */}
       <div className="relative">
         {/* Tabs */}
-        <div className="flex">
+        <div className="flex items-end h-10">
           {fields.map((field, index) => {
             const isActive = activeTab === index;
             const colors = TAB_COLORS[index % TAB_COLORS.length];
@@ -107,15 +107,13 @@ export function CompoundInterestCalculator() {
                 key={field.id}
                 onClick={() => setActiveTab(index)}
                 className={cn(
-                  "relative px-4 py-2 text-sm font-medium rounded-t-lg transition-all",
+                  "relative px-4 text-sm font-medium rounded-t-lg transition-all cursor-pointer",
                   colors.bg,
                   colors.text,
-                  isActive
-                    ? "z-10 -mb-px pb-3"
-                    : "opacity-70 hover:opacity-90 -mb-px pb-2"
+                  isActive ? "py-2.5" : "py-1.5 hover:py-2"
                 )}
                 style={{
-                  marginLeft: index > 0 ? "-8px" : 0,
+                  marginLeft: index > 0 ? "-4px" : 0,
                   zIndex: isActive ? 10 : fields.length - index,
                 }}
               >
