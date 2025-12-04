@@ -303,6 +303,12 @@ export function CompoundInterestCalculator() {
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `Year ${label}`}
+                    contentStyle={{
+                      backgroundColor: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "0.5rem",
+                      color: "var(--foreground)",
+                    }}
                   />
                   <Legend />
                   {investments.map((investment, index) => {
