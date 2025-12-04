@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -63,6 +63,8 @@ const TAB_COLORS = [
 export function CompoundInterestCalculator() {
   const [years, setYears] = useState(5);
   const [activeTab, setActiveTab] = useState(0);
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const { register, setValue, control } = useForm<FormValues>({
     defaultValues: {
@@ -96,6 +98,23 @@ export function CompoundInterestCalculator() {
 
   const investments = useWatch({ control, name: "investments" });
 
+  // Update tab refs array when fields change
+  useEffect(() => {
+    tabRefs.current = tabRefs.current.slice(0, fields.length);
+  }, [fields.length]);
+
+  // Scroll active tab into view
+  useEffect(() => {
+    const activeTabElement = tabRefs.current[activeTab];
+    if (activeTabElement && tabsScrollRef.current) {
+      activeTabElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [activeTab]);
+
   // Calculate result for the active investment
   const activeInvestment = investments?.[activeTab];
   const result = activeInvestment
@@ -117,36 +136,44 @@ export function CompoundInterestCalculator() {
       {/* Card file tabs */}
       <div className="relative">
         {/* Tabs */}
-        <div className="flex items-end h-10">
-          {fields.map((field, index) => {
-            const isActive = activeTab === index;
-            const colors = TAB_COLORS[index % TAB_COLORS.length];
-            return (
-              <button
-                key={field.id}
-                onClick={() => setActiveTab(index)}
-                className={cn(
-                  "relative px-4 text-sm font-medium rounded-t-lg transition-all cursor-pointer",
-                  colors.bg,
-                  colors.text,
-                  isActive ? "py-2.5" : "py-1.5 hover:py-2"
-                )}
-                style={{
-                  marginLeft: index > 0 ? "-4px" : 0,
-                  zIndex: isActive ? 10 : fields.length - index,
-                }}
-              >
-                {investments?.[index]?.name || `Investment ${index + 1}`}
-              </button>
-            );
-          })}
-          {/* Add button */}
-          <button
-            onClick={addInvestment}
-            className="ml-2 px-3 py-1.5 text-sm font-medium rounded-t-lg bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
-          >
-            +
-          </button>
+        <div
+          ref={tabsScrollRef}
+          className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
+          <div className="flex items-end h-10 min-w-max pr-4">
+            {fields.map((field, index) => {
+              const isActive = activeTab === index;
+              const colors = TAB_COLORS[index % TAB_COLORS.length];
+              return (
+                <button
+                  key={field.id}
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
+                  onClick={() => setActiveTab(index)}
+                  className={cn(
+                    "relative px-4 text-sm font-medium rounded-t-lg transition-all cursor-pointer shrink-0",
+                    colors.bg,
+                    colors.text,
+                    isActive ? "py-2.5" : "py-1.5 hover:py-2"
+                  )}
+                  style={{
+                    marginLeft: index > 0 ? "-4px" : 0,
+                    zIndex: isActive ? 10 : fields.length - index,
+                  }}
+                >
+                  {investments?.[index]?.name || `Investment ${index + 1}`}
+                </button>
+              );
+            })}
+            {/* Add button */}
+            <button
+              onClick={addInvestment}
+              className="ml-2 px-3 cursor-pointer py-1.5 hover:pb-2 text-sm font-medium rounded-t-lg bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all shrink-0"
+            >
+              +
+            </button>
+          </div>
         </div>
 
         {/* Active card content */}
