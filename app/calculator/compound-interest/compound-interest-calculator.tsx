@@ -112,28 +112,28 @@ export function CompoundInterestCalculator() {
                 {...register("percentageReturn")}
               />
             </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Investment Period</Label>
-                <span className="text-sm font-medium">
-                  {years} {years === 1 ? "year" : "years"}
-                </span>
-              </div>
-              <Slider
-                value={[YEAR_STEPS.indexOf(years)]}
-                onValueChange={([index]) => setYears(YEAR_STEPS[index])}
-                max={YEAR_STEPS.length - 1}
-                step={1}
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>1</span>
-                <span>40</span>
-              </div>
-            </div>
           </form>
         </CardContent>
       </Card>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Investment Period</Label>
+          <span className="text-sm font-medium">
+            {years} {years === 1 ? "year" : "years"}
+          </span>
+        </div>
+        <Slider
+          value={[YEAR_STEPS.indexOf(years)]}
+          onValueChange={([index]) => setYears(YEAR_STEPS[index])}
+          max={YEAR_STEPS.length - 1}
+          step={1}
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>1</span>
+          <span>40</span>
+        </div>
+      </div>
 
       {result.length > 0 && (
         <Card>
