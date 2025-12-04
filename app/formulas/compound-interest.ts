@@ -10,7 +10,7 @@ type CompoundInterestOptions = {
   months: number;
 };
 
-type CompoundInterestResultItem = {
+export type CompoundInterestResultItem = {
   month: number;
   invested: number;
   totalInvestment: number;
