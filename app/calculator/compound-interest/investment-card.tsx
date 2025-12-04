@@ -45,6 +45,16 @@ export function InvestmentCard({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
+        <Label htmlFor={`investments.${index}.name`}>Name</Label>
+        <Input
+          id={`investments.${index}.name`}
+          type="text"
+          placeholder="Investment name"
+          {...register(`investments.${index}.name`)}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor={`investments.${index}.initialInvestment`}>
           Initial Investment
         </Label>
