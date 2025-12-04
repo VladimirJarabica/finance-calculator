@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { compoundInterest } from "@/app/formulas/compound-interest";
 import { formatNumber, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { InvestmentCard, type FormValues } from "./investment-card";
 
 const YEAR_STEPS = [1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40];
@@ -51,10 +52,19 @@ const DEFAULT_INVESTMENTS = [
   },
 ];
 
+const TAB_COLORS = [
+  { bg: "bg-rose-500", border: "border-t-rose-500" },
+  { bg: "bg-blue-500", border: "border-t-blue-500" },
+  { bg: "bg-emerald-500", border: "border-t-emerald-500" },
+  { bg: "bg-amber-500", border: "border-t-amber-500" },
+  { bg: "bg-purple-500", border: "border-t-purple-500" },
+];
+
 export function CompoundInterestCalculator() {
   const [years, setYears] = useState(5);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const { register, watch, setValue, control } = useForm<FormValues>({
+  const { register, setValue, control } = useForm<FormValues>({
     defaultValues: {
       investments: DEFAULT_INVESTMENTS,
     },
@@ -65,15 +75,18 @@ export function CompoundInterestCalculator() {
     name: "investments",
   });
 
-  // Calculate result only for the first investment
-  const firstInvestment = watch("investments.0");
-  const result = firstInvestment
+  const investments = useWatch({ control, name: "investments" });
+
+  // Calculate result for the active investment
+  const activeInvestment = investments?.[activeTab];
+  const result = activeInvestment
     ? compoundInterest({
-        initialInvestment: formatNumber(firstInvestment.initialInvestment) ?? 0,
-        isYearly: firstInvestment.isYearly,
+        initialInvestment:
+          formatNumber(activeInvestment.initialInvestment) ?? 0,
+        isYearly: activeInvestment.isYearly,
         recurringInvestment:
-          formatNumber(firstInvestment.recurringInvestment) ?? 0,
-        percentageReturn: formatNumber(firstInvestment.percentageReturn) ?? 0,
+          formatNumber(activeInvestment.recurringInvestment) ?? 0,
+        percentageReturn: formatNumber(activeInvestment.percentageReturn) ?? 0,
         months: years * 12,
       })
     : [];
@@ -82,16 +95,52 @@ export function CompoundInterestCalculator() {
     <div className="w-full max-w-3xl space-y-6">
       <h1 className="text-2xl font-bold">Compound Interest Calculator</h1>
 
-      <div className="grid gap-4">
-        {fields.map((field, index) => (
-          <InvestmentCard
-            key={field.id}
-            index={index}
-            control={control}
-            register={register}
-            setValue={setValue}
-          />
-        ))}
+      {/* Card file tabs */}
+      <div className="relative">
+        {/* Tabs */}
+        <div className="flex">
+          {fields.map((field, index) => {
+            const isActive = activeTab === index;
+            const colors = TAB_COLORS[index % TAB_COLORS.length];
+            return (
+              <button
+                key={field.id}
+                onClick={() => setActiveTab(index)}
+                className={cn(
+                  "relative px-4 py-2 text-sm font-medium text-white rounded-t-lg transition-all",
+                  colors.bg,
+                  isActive
+                    ? "z-10 -mb-px pb-3"
+                    : "opacity-70 hover:opacity-90 -mb-px pb-2"
+                )}
+                style={{
+                  marginLeft: index > 0 ? "-8px" : 0,
+                  zIndex: isActive ? 10 : fields.length - index,
+                }}
+              >
+                {investments?.[index]?.name || `Investment ${index + 1}`}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active card content */}
+        <Card
+          className={cn(
+            "rounded-tl-none border-t-4",
+            TAB_COLORS[activeTab % TAB_COLORS.length].border
+          )}
+        >
+          <CardContent className="pt-6">
+            <InvestmentCard
+              key={fields[activeTab]?.id}
+              index={activeTab}
+              control={control}
+              register={register}
+              setValue={setValue}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="space-y-4">
@@ -116,7 +165,7 @@ export function CompoundInterestCalculator() {
       {result.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Results ({firstInvestment?.name})</CardTitle>
+            <CardTitle>Results ({activeInvestment?.name})</CardTitle>
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
