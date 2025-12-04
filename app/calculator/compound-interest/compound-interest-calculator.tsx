@@ -70,10 +70,29 @@ export function CompoundInterestCalculator() {
     },
   });
 
-  const { fields } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "investments",
   });
+
+  const addInvestment = () => {
+    append({
+      name: `Investment ${fields.length + 1}`,
+      initialInvestment: "0",
+      isYearly: false,
+      recurringInvestment: "0",
+      percentageReturn: "7",
+    });
+    setActiveTab(fields.length);
+  };
+
+  const removeInvestment = (index: number) => {
+    if (fields.length <= 1) return; // Keep at least one
+    remove(index);
+    if (activeTab >= fields.length - 1) {
+      setActiveTab(Math.max(0, fields.length - 2));
+    }
+  };
 
   const investments = useWatch({ control, name: "investments" });
 
@@ -121,6 +140,13 @@ export function CompoundInterestCalculator() {
               </button>
             );
           })}
+          {/* Add button */}
+          <button
+            onClick={addInvestment}
+            className="ml-2 px-3 py-1.5 text-sm font-medium rounded-t-lg bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+          >
+            +
+          </button>
         </div>
 
         {/* Active card content */}
@@ -138,6 +164,17 @@ export function CompoundInterestCalculator() {
               register={register}
               setValue={setValue}
             />
+            {fields.length > 1 && (
+              <div className="mt-6 pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeInvestment(activeTab)}
+                >
+                  Remove Investment
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
