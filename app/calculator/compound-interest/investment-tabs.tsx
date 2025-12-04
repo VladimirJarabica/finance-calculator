@@ -4,7 +4,6 @@ import { useRef, useEffect } from "react";
 import { UseFormRegister, UseFormSetValue, Control } from "react-hook-form";
 import { FieldArrayWithId } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { InvestmentCard, type FormValues } from "./investment-card";
 import { TAB_COLORS } from "./constants";
 import { cn } from "@/lib/utils";
@@ -63,17 +62,13 @@ export function InvestmentTabs({
           {fields.map((field, index) => {
             const isActive = activeTab === index;
             const colors = TAB_COLORS[index % TAB_COLORS.length];
+            const canRemove = fields.length > 1;
             return (
-              <button
+              <div
                 key={field.id}
-                ref={(el) => {
-                  tabRefs.current[index] = el;
-                }}
-                onClick={() => setActiveTab(index)}
                 className={cn(
-                  "relative px-4 text-sm font-medium rounded-t-lg transition-all cursor-pointer shrink-0",
+                  "relative flex items-center gap-1 rounded-t-lg transition-all shrink-0",
                   colors.bg,
-                  colors.text,
                   isActive ? "py-2.5" : "py-1.5 hover:py-2"
                 )}
                 style={{
@@ -81,8 +76,47 @@ export function InvestmentTabs({
                   zIndex: isActive ? 10 : fields.length - index,
                 }}
               >
-                {investments?.[index]?.name || `Investment ${index + 1}`}
-              </button>
+                <button
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
+                  onClick={() => setActiveTab(index)}
+                  className={cn(
+                    "text-sm font-medium cursor-pointer px-4",
+                    colors.text
+                  )}
+                >
+                  {investments?.[index]?.name || `Investment ${index + 1}`}
+                </button>
+                {canRemove && isActive && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveInvestment(index);
+                    }}
+                    className={cn(
+                      "mr-2 w-5 h-5 flex items-center justify-center rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer",
+                      colors.text
+                    )}
+                    aria-label="Remove investment"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="9" y1="3" x2="3" y2="9" />
+                      <line x1="3" y1="3" x2="9" y2="9" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             );
           })}
           {/* Add button */}
@@ -110,17 +144,6 @@ export function InvestmentTabs({
             register={register}
             setValue={setValue}
           />
-          {fields.length > 1 && (
-            <div className="mt-6 pt-4 border-t">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onRemoveInvestment(activeTab)}
-              >
-                Remove Investment
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
